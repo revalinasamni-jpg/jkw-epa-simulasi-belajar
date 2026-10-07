@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulasi Balapan: Kecepatan, Jarak, Waktu</title>
+<style>
+:root{--bg:#eef6ff;--card:#fff;--ink:#1c2b3a;--sub:#5b7086;--blue:#2f6fed;--orange:#ff8a3d;--green:#1fb672;--line:#dbe6f3;--track:#c9dcf0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1720;--card:#182432;--ink:#eef3fa;--sub:#9fb2c6;--line:#2a3c50;--track:#22344a}}
+:root[data-theme="dark"]{--bg:#0f1720;--card:#182432;--ink:#eef3fa;--sub:#9fb2c6;--line:#2a3c50;--track:#22344a}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+.wrap{max-width:780px;margin:0 auto;padding:24px 18px 40px}
+h1{font-size:1.5rem;margin:4px 0 2px;text-align:center}
+.sub{color:var(--sub);text-align:center;margin:0 0 20px;font-size:.95rem}
+.card{background:var(--card);border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:0 2px 10px rgba(20,40,70,.06)}
+.tabs{display:flex;gap:8px;margin-bottom:18px;overflow-x:auto}
+.tab{flex:1;text-align:center;padding:10px 8px;border-radius:12px;background:var(--card);border:2px solid var(--line);cursor:pointer;font-weight:600;font-size:.9rem;color:var(--sub);white-space:nowrap}
+.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.hidden{display:none}
+.row{display:flex;gap:16px;flex-wrap:wrap}
+.field{flex:1;min-width:200px}
+label{display:block;font-size:.85rem;color:var(--sub);margin-bottom:6px;font-weight:600}
+input[type=range]{width:100%}
+input[type=number],input[type=password]{width:100%;padding:10px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink);font-size:1rem}
+.valtag{font-weight:700;color:var(--blue)}.valtag.orange{color:var(--orange)}
+button{background:var(--blue);color:#fff;border:none;padding:12px 20px;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer}
+button:active{transform:scale(.98)}button:disabled{opacity:.5}
+button.secondary{background:transparent;color:var(--blue);border:2px solid var(--blue)}
+.track{position:relative;height:56px;background:var(--track);border-radius:10px;margin:10px 0;overflow:hidden}
+.finish{position:absolute;right:6px;top:0;bottom:0;width:4px;background:repeating-linear-gradient(45deg,#111 0 6px,#fff 6px 12px)}
+.car{position:absolute;top:8px;font-size:2rem;left:0}.carB{top:24px}
+.readout{display:flex;justify-content:space-between;font-size:.9rem;color:var(--sub);margin-top:4px}
+.result{margin-top:14px;padding:14px;border-radius:12px;background:var(--bg);font-size:.95rem;line-height:1.6}
+.result b{color:var(--blue)}.winner{font-weight:800;color:var(--green);font-size:1.05rem}
+.qcard{border:2px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.qno{font-size:.8rem;font-weight:700;color:var(--blue)}
+.qtxt{font-size:1.05rem;font-weight:600;margin:4px 0 10px}
+.qrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.qrow input{max-width:140px}.unit{color:var(--sub);font-weight:600}
+.fb{margin-top:10px;font-weight:700;padding:10px;border-radius:10px}
+.fb.ok{background:rgba(31,182,114,.15);color:var(--green)}.fb.no{background:rgba(255,80,80,.15);color:#e14444}
+.chips{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.chip{padding:8px 14px;border-radius:20px;border:2px solid var(--line);cursor:pointer;font-weight:700;font-size:.85rem;color:var(--sub)}
+.chip.active{background:var(--orange);border-color:var(--orange);color:#fff}
+.score{text-align:center;color:var(--sub);margin-top:6px;font-size:.9rem}
+.gtabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}.gtab{padding:9px 14px;border-radius:12px;border:2px solid var(--line);cursor:pointer;font-weight:700;font-size:.85rem;color:var(--sub)}.gtab.active{background:var(--blue);border-color:var(--blue);color:#fff}.tag{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--line);color:var(--sub);margin-left:6px}.tools{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.key{font-size:.9rem;line-height:1.55;margin:6px 0 0;color:var(--sub)}.key b{color:var(--green)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🏁 Simulasi Kecepatan, Jarak, Waktu</h1>
+  <p class="sub">Atur kecepatan mobil, lihat siapa duluan sampai, lalu uji pemahamanmu!</p>
+  <div class="tabs">
+    <div class="tab active" id="tabRace" onclick="switchTab('race')">🚗 Balapan</div>
+    <div class="tab" id="tabQuiz" onclick="switchTab('quiz')">🧮 Uji Hitung</div>
+    <div class="tab" id="tabGuru" onclick="switchTab('guru')">🔒 Guru</div>
+  </div>
+
+  <div id="raceView">
+    <div class="card">
+      <div class="row"><div class="field">
+        <label>Jarak Lintasan: <span class="valtag" id="distVal">100</span> meter</label>
+        <input type="range" id="distInput" min="50" max="300" step="10" value="100" oninput="updateLabels()">
+      </div></div>
+      <div class="row">
+        <div class="field"><label>🔵 Kecepatan Mobil A: <span class="valtag" id="speedAVal">5</span> m/detik</label>
+          <input type="range" id="speedA" min="1" max="10" step="1" value="5" oninput="updateLabels()"></div>
+        <div class="field"><label>🟠 Kecepatan Mobil B: <span class="valtag orange" id="speedBVal">3</span> m/detik</label>
+          <input type="range" id="speedB" min="1" max="10" step="1" value="3" oninput="updateLabels()"></div>
+      </div>
+      <div class="track"><div class="finish"></div><div class="car" id="carA">🔵🚗</div><div class="car carB" id="carB">🟠🚙</div></div>
+      <div class="readout"><span id="timeReadout">Waktu: 0.0 detik</span><span id="statusReadout">Siap mulai</span></div>
+      <div class="row" style="margin-top:14px">
+        <button onclick="startRace()" id="startBtn">▶ Mulai Balapan</button>
+        <button class="secondary" onclick="resetRace()">⟲ Ulangi</button>
+      </div>
+      <div class="result" id="raceResult">Tekan "Mulai Balapan" lalu perhatikan siapa lebih dulu sampai garis finish. Ingat: <b>kecepatan = jarak ÷ waktu</b>.</div>
+    </div>
+  </div>
+
+  <div id="quizView" class="hidden">
+    <div class="chips" id="chips"></div>
+    <div id="qlist"></div>
+    <div class="score" id="scoreBox">Benar: <span id="scoreOk">0</span> &nbsp;|&nbsp; Salah: <span id="scoreNo">0</span></div>
+  </div>
+
+  <div id="guruView" class="hidden">
+    <div class="card" id="pinBox">
+      <label>Masukkan PIN guru untuk melihat kunci jawaban</label>
+      <div class="qrow"><input type="password" id="pin" placeholder="PIN"><button onclick="openKey()">Buka</button></div>
+      <div class="fb no hidden" id="pinErr">PIN salah.</div>
+    </div>
+    <div id="keyBox" class="hidden"></div>
+  </div>
+</div>
+
+<script>
+// ===== BANK SOAL (tetap, sama untuk semua siswa) =====
+const Q = [
+ {k:1,t:'Sebuah sepeda menempuh jarak 60 meter dalam waktu 12 detik. Berapa kecepatannya?',a:5,u:'m/detik',s:'Kecepatan = jarak ÷ waktu = 60 ÷ 12 = 5'},
+ {k:1,t:'Sebuah motor menempuh jarak 150 km dalam waktu 3 jam. Berapa kecepatannya?',a:50,u:'km/jam',s:'Kecepatan = 150 ÷ 3 = 50'},
+ {k:1,t:'Bus berangkat pukul 08.00 dan tiba pukul 12.00 setelah menempuh 240 km. Berapa kecepatan rata-ratanya?',a:60,u:'km/jam',s:'Waktu = 12.00 − 08.00 = 4 jam. Kecepatan = 240 ÷ 4 = 60'},
+ {k:2,t:'Sebuah mobil mainan melaju 8 m/detik selama 6 detik. Berapa jarak yang ditempuh?',a:48,u:'meter',s:'Jarak = kecepatan × waktu = 8 × 6 = 48'},
+ {k:2,t:'Kereta api melaju dengan kecepatan 80 km/jam selama 3 jam. Berapa jarak yang ditempuh?',a:240,u:'km',s:'Jarak = 80 × 3 = 240'},
+ {k:2,t:'Ayah naik motor berkecepatan 40 km/jam. Berangkat pukul 07.00 dan tiba pukul 09.00. Berapa jarak yang ditempuh?',a:80,u:'km',s:'Waktu = 09.00 − 07.00 = 2 jam. Jarak = 40 × 2 = 80'},
+ {k:3,t:'Seorang pelari menempuh jarak 120 meter dengan kecepatan 4 m/detik. Berapa lama waktu yang dibutuhkan?',a:30,u:'detik',s:'Waktu = jarak ÷ kecepatan = 120 ÷ 4 = 30'},
+ {k:3,t:'Bus menempuh jarak 180 km dengan kecepatan 60 km/jam. Berapa lama perjalanannya?',a:3,u:'jam',s:'Waktu = 180 ÷ 60 = 3'},
+ {k:3,t:'Ali berangkat pukul 06.00 menuju kota sejauh 90 km dengan kecepatan 45 km/jam. Pukul berapa Ali tiba? (tulis angka jamnya saja)',a:8,u:'pukul',s:'Waktu = 90 ÷ 45 = 2 jam. Tiba = 06.00 + 2 jam = pukul 08.00'}
+];
+const KN = {1:'Kelompok 1 · Mencari Kecepatan',2:'Kelompok 2 · Mencari Jarak',3:'Kelompok 3 · Mencari Waktu',M:'Latihan Mandiri (Bebas)'};
+// ===== LATIHAN MANDIRI (15 soal tetap, boleh diulang sepuasnya) =====
+const Q2 = [
+ {j:'Kecepatan',t:'Seorang pelari menempuh 100 meter dalam 20 detik. Berapa kecepatannya?',a:5,u:'m/detik',s:'v = s ÷ t = 100 ÷ 20 = 5'},
+ {j:'Kecepatan',t:'Mobil menempuh 120 km dalam 2 jam. Berapa kecepatannya?',a:60,u:'km/jam',s:'v = 120 ÷ 2 = 60'},
+ {j:'Kecepatan',t:'Sepeda menempuh 90 meter dalam 15 detik. Berapa kecepatannya?',a:6,u:'m/detik',s:'v = 90 ÷ 15 = 6'},
+ {j:'Kecepatan',t:'Kereta menempuh 300 km dalam 5 jam. Berapa kecepatannya?',a:60,u:'km/jam',s:'v = 300 ÷ 5 = 60'},
+ {j:'Kecepatan (tantangan)',t:'Motor berangkat pukul 09.00 dan tiba pukul 12.00 setelah menempuh 135 km. Berapa kecepatannya?',a:45,u:'km/jam',s:'Waktu = 12.00 − 09.00 = 3 jam. v = 135 ÷ 3 = 45'},
+ {j:'Jarak',t:'Seekor kelinci berlari 6 m/detik selama 10 detik. Berapa jarak yang ditempuh?',a:60,u:'meter',s:'s = v × t = 6 × 10 = 60'},
+ {j:'Jarak',t:'Mobil melaju 70 km/jam selama 2 jam. Berapa jarak yang ditempuh?',a:140,u:'km',s:'s = 70 × 2 = 140'},
+ {j:'Jarak',t:'Siput merayap 3 cm/detik selama 20 detik. Berapa jarak yang ditempuh?',a:60,u:'cm',s:'s = 3 × 20 = 60'},
+ {j:'Jarak',t:'Pesawat terbang 600 km/jam selama 4 jam. Berapa jarak yang ditempuh?',a:2400,u:'km',s:'s = 600 × 4 = 2400'},
+ {j:'Jarak (tantangan)',t:'Bus berkecepatan 50 km/jam berangkat pukul 06.00 dan tiba pukul 10.00. Berapa jarak yang ditempuh?',a:200,u:'km',s:'Waktu = 10.00 − 06.00 = 4 jam. s = 50 × 4 = 200'},
+ {j:'Waktu',t:'Jarak 200 meter ditempuh dengan kecepatan 8 m/detik. Berapa lama waktunya?',a:25,u:'detik',s:'t = s ÷ v = 200 ÷ 8 = 25'},
+ {j:'Waktu',t:'Jarak 240 km ditempuh dengan kecepatan 80 km/jam. Berapa lama waktunya?',a:3,u:'jam',s:'t = 240 ÷ 80 = 3'},
+ {j:'Waktu',t:'Jarak 90 km ditempuh dengan kecepatan 30 km/jam. Berapa lama waktunya?',a:3,u:'jam',s:'t = 90 ÷ 30 = 3'},
+ {j:'Waktu',t:'Jarak 450 meter ditempuh dengan kecepatan 9 m/detik. Berapa lama waktunya?',a:50,u:'detik',s:'t = 450 ÷ 9 = 50'},
+ {j:'Waktu (tantangan)',t:'Dino berangkat pukul 07.00 menuju tempat sejauh 120 km dengan kecepatan 40 km/jam. Pukul berapa Dino tiba? (tulis angka jamnya saja)',a:10,u:'pukul',s:'t = 120 ÷ 40 = 3 jam. Tiba = 07.00 + 3 jam = pukul 10.00'}
+];
+let order = Q2.map((_,i)=>i), mOk = 0, mNo = 0, mDone = {};
+const PIN = 'guru2026';
+let curK = 1, ok = 0, no = 0, done = {};
+
+function switchTab(t){
+  ['race','quiz','guru'].forEach(x=>{
+    document.getElementById(x+'View').classList.toggle('hidden', t!==x);
+    document.getElementById('tab'+x[0].toUpperCase()+x.slice(1)).classList.toggle('active', t===x);
+  });
+}
+function updateLabels(){
+  distVal.textContent = distInput.value; speedAVal.textContent = speedA.value; speedBVal.textContent = speedB.value;
+}
+updateLabels();
+
+let raceTimer = null;
+function startRace(){
+  resetRace(true);
+  const dist = +distInput.value, vA = +speedA.value, vB = +speedB.value;
+  const tA = dist/vA, tB = dist/vB, track = document.querySelector('.track');
+  startBtn.disabled = true; statusReadout.textContent = 'Berlangsung...';
+  let el = 0;
+  raceTimer = setInterval(()=>{
+    el += 0.1;
+    const w = track.clientWidth - 40;
+    carA.style.left = (Math.min(1,el/tA)*w)+'px';
+    carB.style.left = (Math.min(1,el/tB)*w)+'px';
+    timeReadout.textContent = 'Waktu: '+el.toFixed(1)+' detik';
+    if(el>=tA && el>=tB){
+      clearInterval(raceTimer); startBtn.disabled = false; statusReadout.textContent = 'Selesai!';
+      const win = tA<tB ? 'Mobil A 🔵' : (tB<tA ? 'Mobil B 🟠' : 'Seri! Keduanya sampai bersamaan');
+      raceResult.innerHTML = '<span class="winner">🏆 '+win+(tA===tB?'':' lebih dulu sampai!')+'</span><br><br>'+
+        'Mobil A: waktu = '+dist+' ÷ '+vA+' = <b>'+tA.toFixed(1)+' detik</b><br>'+
+        'Mobil B: waktu = '+dist+' ÷ '+vB+' = <b>'+tB.toFixed(1)+' detik</b><br><br>'+
+        'Semakin besar kecepatan, semakin sedikit waktu untuk menempuh jarak yang sama.';
+    }
+  }, 60);
+}
+function resetRace(keep){
+  if(raceTimer) clearInterval(raceTimer);
+  carA.style.left = carB.style.left = '0px';
+  timeReadout.textContent = 'Waktu: 0.0 detik'; statusReadout.textContent = 'Siap mulai';
+  if(!keep){ startBtn.disabled = false; raceResult.innerHTML = 'Tekan "Mulai Balapan" lalu perhatikan siapa lebih dulu sampai garis finish. Ingat: <b>kecepatan = jarak ÷ waktu</b>.'; }
+}
+
+function renderChips(){
+  chips.innerHTML = [1,2,3,'M'].map(k=>'<div class="chip'+(k===curK?' active':'')+'" onclick="setK(\''+k+'\')">'+KN[k]+'</div>').join('');
+}
+function setK(k){ curK = (k==='M') ? 'M' : +k; scoreBox.style.display = curK==='M' ? 'none' : ''; renderChips(); renderQ(); }
+function renderM(){
+  qlist.innerHTML = '<div class="tools"><button class="secondary" onclick="shuffleM()">🔀 Acak Soal</button><button class="secondary" onclick="resetM()">⟲ Ulangi dari Awal</button></div>'+
+    '<div class="score" style="margin:0 0 12px">Latihan bebas: kerjakan sebanyak yang kamu mau. Benar: <b id="mOk">'+mOk+'</b> | Salah: <b id="mNo">'+mNo+'</b></div>'+
+    order.map((qi,n)=>{const q=Q2[qi];return '<div class="qcard"><div class="qno">Soal '+(n+1)+'<span class="tag">'+q.j+'</span></div><div class="qtxt">'+q.t+'</div>'+
+    '<div class="qrow"><input type="number" id="m'+qi+'" placeholder="Jawaban"><span class="unit">'+q.u+'</span><button onclick="checkM('+qi+')">Cek</button></div><div id="mf'+qi+'"></div></div>';}).join('');
+}
+function checkM(i){
+  const v = parseFloat(document.getElementById('m'+i).value), f = document.getElementById('mf'+i);
+  if(isNaN(v)) return;
+  const right = v === Q2[i].a;
+  if(!mDone[i]){ right ? mOk++ : mNo++; if(right) mDone[i]=true; document.getElementById('mOk').textContent=mOk; document.getElementById('mNo').textContent=mNo; }
+  f.innerHTML = right ? '<div class="fb ok">✅ Benar! Jawabannya '+Q2[i].a+' '+Q2[i].u+'.</div>' : '<div class="fb no">❌ Belum tepat. Coba lagi, kamu boleh mengulang sepuasnya!</div>';
+}
+function shuffleM(){ for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];} renderM(); }
+function resetM(){ order = Q2.map((_,i)=>i); mOk=0; mNo=0; mDone={}; renderM(); }
+function renderQ(){
+  if(curK==='M') return renderM();
+  qlist.innerHTML = Q.map((q,i)=>q.k!==curK?'':
+    '<div class="qcard"><div class="qno">Soal '+(i+1)+'</div><div class="qtxt">'+q.t+'</div>'+
+    '<div class="qrow"><input type="number" id="a'+i+'" placeholder="Jawaban"><span class="unit">'+q.u+'</span>'+
+    '<button onclick="check('+i+')">Cek</button></div><div id="f'+i+'"></div></div>').join('');
+}
+function check(i){
+  const v = parseFloat(document.getElementById('a'+i).value), f = document.getElementById('f'+i);
+  if(isNaN(v)) return;
+  const right = v === Q[i].a;
+  if(!done[i]){ right ? ok++ : no++; done[i] = true; scoreOk.textContent = ok; scoreNo.textContent = no; }
+  f.innerHTML = right ? '<div class="fb ok">✅ Benar! Jawabannya '+Q[i].a+' '+Q[i].u+'.</div>'
+                      : '<div class="fb no">❌ Belum tepat. Coba hitung lagi dengan rumusnya!</div>';
+}
+function openKey(){
+  if(pin.value !== PIN){ pinErr.classList.remove('hidden'); return; }
+  pinBox.classList.add('hidden'); keyBox.classList.remove('hidden');
+  const kA = Q.map((q,i)=>'<div class="qcard"><div class="qno">Soal '+(i+1)+' · '+KN[q.k]+'</div><div class="qtxt">'+q.t+'</div><div class="key"><b>Jawaban: '+q.a+' '+q.u+'</b><br>Langkah: '+q.s+'</div></div>').join('');
+  const kB = Q2.map((q,i)=>'<div class="qcard"><div class="qno">Soal '+(i+1)+'<span class="tag">'+q.j+'</span></div><div class="qtxt">'+q.t+'</div><div class="key"><b>Jawaban: '+q.a+' '+q.u+'</b><br>Langkah: '+q.s+'</div></div>').join('');
+  keyBox.innerHTML = '<div class="gtabs"><div class="gtab active" id="gtA" onclick="gk(\'A\')">Kunci Soal Kelompok 1–3</div><div class="gtab" id="gtB" onclick="gk(\'B\')">Kunci Latihan Mandiri</div></div><div id="kA">'+kA+'</div><div id="kB" class="hidden">'+kB+'</div>';
+}
+function gk(w){
+  kA.classList.toggle('hidden', w!=='A'); kB.classList.toggle('hidden', w!=='B');
+  gtA.classList.toggle('active', w==='A'); gtB.classList.toggle('active', w==='B');
+}
+renderChips(); renderQ();
+</script>
+</body>
+</html>
